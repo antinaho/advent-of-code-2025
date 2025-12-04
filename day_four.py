@@ -10,6 +10,9 @@ if __name__ == "__main__":
 
     delta = [[-1, 1], [0, 1], [1, 1], [-1, 0], [1, 0], [-1, -1], [0, -1], [1, -1]]
 
+    # Star 1 + 2
+    # Start 1: just run while loop once :)
+
     def remove_barrel_from_point(x, y):
         b = 0
         for d in delta:
