@@ -6,12 +6,10 @@ if __name__ == "__main__":
     coords = [list(map(int, line.split(","))) for line in I.splitlines()]
 
     def dist(point1, point2):
-        import math
-
-        return math.sqrt(
-            ((point1[0] - point2[0]) ** 2)
-            + ((point1[1] - point2[1]) ** 2)
-            + ((point1[2] - point2[2]) ** 2)
+        return (
+            (point1[0] - point2[0]) ** 2
+            + (point1[1] - point2[1]) ** 2
+            + (point1[2] - point2[2]) ** 2
         )
 
     distances = []
@@ -24,12 +22,6 @@ if __name__ == "__main__":
 
     distances.sort(key=lambda x: x[2])
 
-    # print(len(distances))
-
-    for i in range(len(distances) - 1, -1, -1):
-        if i % 2 == 0:
-            distances.pop(i)
-
     import collections
 
     # Star 1
@@ -37,10 +29,9 @@ if __name__ == "__main__":
     connections = collections.defaultdict(set)
     cn = 1000
 
-    # print(distances[:20])
-
     while cn > 0:
-        for p1, p2, d in distances:
+        for i in range(0, len(distances), 2):
+            p1, p2, d = distances[i]
             if cn <= 0:
                 break
 
@@ -104,7 +95,8 @@ if __name__ == "__main__":
     connections = collections.defaultdict(set)
 
     while True:
-        for p1, p2, d in distances:
+        for i in range(0, len(distances), 2):
+            p1, p2, d = distances[i]
             # print(connections)
             # print(p1, p2)
             dupe = False
@@ -152,13 +144,9 @@ if __name__ == "__main__":
 
                 modified = True
 
-            # print(p1, p2, connections)
-
             if modified:
-                # print(p1, p2, coords[p1], coords[p2])
                 continue
 
-            # print(p1, p2, coords[p1], coords[p2])
             connections[p1].add(p1)
             connections[p1].add(p2)
 
