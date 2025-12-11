@@ -1,6 +1,7 @@
 import sys
 
 if __name__ == "__main__":
+
     I = sys.stdin.read()
 
     # Star 1
@@ -29,17 +30,26 @@ if __name__ == "__main__":
 
     # Star 2
 
-    import collections
-
-    x_ranges = collections.defaultdict(list)
-    y_ranges = collections.defaultdict(list)
     c = 0
     lines = I.splitlines()
 
     reds = set()
     greens = set()
+    yellow = set()
     start_x, start_y = list(map(int, lines[0].split(",")))
 
+    def F(point1, point2):
+        if point1[0] == point2[0]:
+            if point1[1] < point2[1]:
+                return "DOWN"
+            return "UP"
+                
+        else:
+            if point1[0] < point2[0]:
+                return "LEFT"
+            return "RIGHT" 
+
+    dir = "UP"
     while c < len(lines):
         x, y = list(map(int, lines[c].split(",")))
         reds.add((x, y))
@@ -49,83 +59,249 @@ if __name__ == "__main__":
         else:
             x_next, y_next = list(map(int, lines[c + 1].split(",")))
 
-        if x == x_next:
-            for dif in range(min(y, y_next) + 1, max(y, y_next)):
-                greens.add((x, dif))
+        dir = F((x, y), (x_next, y_next))
 
-        if y == y_next:
-            for dif in range(min(x, x_next) + 1, max(x, x_next)):
+        if x == x_next:
+            for dif in range(min(y, y_next), max(y, y_next) + 1):
+                greens.add((x, dif))
+                if dir == "UP":
+                    yellow.add((x - 1, dif))
+                else:
+                    yellow.add((x + 1, dif))
+        elif y == y_next:
+            for dif in range(min(x, x_next), max(x, x_next) + 1):
                 greens.add((dif, y))
+                if dir == "RIGHT":
+                    yellow.add((dif, y + 1))
+                else:
+                    yellow.add((dif, y - 1))
         c += 1
 
-    for y in range(ymin, ymax + 1):
-        s = ""
-        for x in range(xmin, xmax + 1):
-            if (x, y) in reds:
-                s += "#"
-            elif (x, y) in greens:
-                s += "X"
-            else:
-                s += "."
-        print(s)
+    
 
-    yellow = set()
+    # for y in range(ymin - 1, ymax + 2):
+    #     s = ""
+    #     for x in range(xmin - 2, xmax + 2):
+    #         if (x, y) in reds:
+    #             s += "#"
+    #         elif (x, y) in greens:
+    #             s += "X"
+    #         elif (x, y) in yellow:
+    #             s += "@"
+    #         else:
+    #             s += "."
+    #     print(s)
 
-    for i, j, a in areas:
-        x1, y1 = coords[i]
-        x2, y2 = coords[j]
+    # print(len(reds))
+    # print(len(greens))
 
-        corner_one = (x1, y2)
-        corner_one_x, corner_one_y = corner_one
+    greens = greens.union(reds)
+    yellow.difference_update(greens)
+    print(len(yellow))
+    areas.sort(key=lambda a: a[2])
+    
+    for n, (i, j, a) in enumerate(areas):
 
-        corner_two = (x2, y1)
-        corner_two_x, corner_two_y = corner_two
 
-        beam1 = ()
+        p1 = tuple(coords[i])
+        p2 = tuple(coords[j])
+        p3 = (p1[0], p2[1])
+        p4 = (p2[0], p1[1])
 
-        X, Y = (xmin - 1, corner_one_y)
-        dx, dy = ((x1 - X) // abs(x1 - X), (y2 - Y) // abs(y2 - Y))
-
-        # Move to point 1
-        IN = False
-        k = 0
-        c = False
-        while X != xmax + 1:
-            if not IN and ((X, Y) in reds or (X, Y) or greens):
-                IN = True
-            if (X, Y) not in reds and (X, Y) not in greens:
-                k += 1
-                IN = False
-
-        k = 0
-        while sx != x1:
-            if (sx, sy) in greens or (sx, sy) in reds:
-                k += 1
-
-        k = 0
-        while corner_one_x != x1:
-            if (corner_one_x, corner_one_y) in reds or (cx, corner_one_y) in greens:
-                k += 1
-
-            cx += dx
-
-        corner = (x2, y1)
-
-        yellow.add((corner1[0], corner1[1]))
-        yellow.add((corner2[0], corner2[1]))
-
-        break
-
-    print()
-    for y in range(ymin, ymax + 1):
-        s = ""
-        for x in range(xmin, xmax + 1):
+        min_x, max_x = min(p1[0], p4[0]), max(p1[0], p4[0])
+        y = p1[1]
+        hit = False
+        for x in range(min_x, max_x + 1):
             if (x, y) in yellow:
-                s += "@"
-            elif (x, y) in reds:
-                s += "#"
-            elif (x, y) in greens:
-                s += "X"
-            else:
-                s += "."
-        print(s)
+                hit = True
+                break
+        if hit:
+            continue
+
+        min_x, max_x = min(p3[0], p2[0]), max(p3[0], p2[0])
+        y = p2[1]
+        hit = False
+        for x in range(min_x, max_x + 1):
+            if (x, y) in yellow:
+                hit = True
+                break
+        if hit:
+            continue
+
+        min_y, max_y = min(p1[1], p3[1]), max(p1[1], p3[1])
+        x = p1[0]
+        hit = False
+        for y in range(min_y, max_y + 1):
+            if (x, y) in yellow:
+                hit = True
+                break
+        if hit:
+            continue
+
+        
+        min_y, max_y = min(p2[1], p4[1]), max(p2[1], p4[1])
+        x = p1[0]
+        hit = False
+        for y in range(min_y, max_y + 1):
+            if (x, y) in yellow:
+                hit = True
+                break
+        if hit:
+            continue
+
+
+        print(a)
+
+        # #  p1   p4
+        # #
+        # #  p3   p2
+
+
+        
+
+        
+
+
+
+
+
+        # # p1 <-> p4
+        # y = p1[1]
+        # passes = 0
+        # was_in = False
+        # in_ = False
+        # s, e = -1, -1
+
+        # for x in range(min(p1[0], p4[0]) - 2, max(p1[0], p4[0]) + 2):
+        #     if not in_ and (x, y) in greens:
+        #         in_ = True
+        #     elif in_ and (x, y) not in greens:
+        #         in_ = False
+
+        #     if was_in and not in_:
+        #         passes += 1
+
+        #     was_in = in_
+
+        #     if (x, y) == p4:
+        #         s = passes
+        #     if (x, y) == p1:
+        #         e = passes
+
+        #     if e != -1 and s != -1:
+        #         break
+        # if s != e:
+        #     continue
+
+        
+
+        # # p3 <-> p2
+        # y = p2[1]
+        # passes = 0
+        # in_ = False
+        # was_in = False
+        # s, e = -1, -1
+        # for x in range(min(p3[0], p2[0]) - 2, max(p3[0], p2[0]) + 2):
+
+        #     if not in_ and (x, y) in greens:
+        #         in_ = True
+        #     elif in_ and (x, y) not in greens:
+        #         in_ = False
+
+        #     if was_in and not in_:
+        #         passes += 1
+
+        #     was_in = in_
+        #     if (x, y) == p3:
+        #         s = passes
+        #     if (x, y) == p2:
+        #         e = passes
+ 
+        #     if e != -1 and s != -1:
+        #         break
+        # if s != e:
+        #     continue
+
+    
+        # # p1 v^ p3
+        # x = p1[0]
+        # passes = 0
+        # in_ = False
+        # was_in = False
+        # s, e = -1, -1
+        # for y in range(min(p1[1], p3[1]) - 2, max(p1[1], p3[1]) + 2):
+
+        #     if not in_ and (x, y) in greens:
+        #         in_ = True
+        #     elif in_ and (x, y) not in greens:
+        #         in_ = False
+
+        #     if not was_in and in_:
+        #         passes += 1
+
+        #     was_in = in_
+
+        #     if (x, y) == p3:
+        #         s = passes
+        #     if (x, y) == p1:
+        #         e = passes
+            
+        #     if e != -1 and s != -1:
+        #         break
+
+        # if s != e:
+        #     #print("Not in", p3)
+        #     continue
+        
+    
+        # # p4 v^ p2
+        # x = p2[0]
+        # passes = 0
+        # in_ = False
+        # was_in = False
+        # s, e = -1, -1
+        # for y in range(min(p2[1], p4[1]) - 2, max(p2[1], p4[1]) + 2):
+ 
+        #     if not in_ and (x, y) in greens:
+        #         in_ = True
+        #     elif in_ and (x, y) not in greens:
+        #         in_ = False
+
+        #     if not was_in and in_:
+        #         passes += 1
+
+        #     was_in = in_
+
+        #     if (x, y) == p4:
+        #         s = passes
+        #     if (x, y) == p2:
+        #         e = passes
+            
+        #     if e != -1 and s != -1:
+        #         break
+
+        
+        # if s != e:
+        #     #print(p1, p2, p3, p4, s, e, a)
+        #     continue
+
+        # print(a)
+        # break
+        
+    
+    # for y in range(ymin, ymax + 1):
+    #     s = ""
+    #     for x in range(xmin, xmax + 1):
+    #         if (x, y) in reds:
+    #             s += "#"
+    #         elif (x, y) in greens:
+    #             s += "X"
+    #         elif (x, y) in yellows:
+    #             s += "@"
+    #         else:
+    #             s += "."
+    #     print(s)
+    
+
+
+
